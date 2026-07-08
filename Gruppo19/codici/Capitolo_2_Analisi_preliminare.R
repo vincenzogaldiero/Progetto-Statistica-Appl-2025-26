@@ -2,7 +2,7 @@
 rm(list = ls())
 
 # Impostazione della cartella di lavoro
-setwd("C:/Users/vince/Desktop/Gruppo19")
+setwd("/Users/danaiannaccone/Desktop/Gruppo19_SA")
 
 # Importazione del dataset
 dataset <- read.csv("Dataset_N19.csv", header = TRUE)
@@ -22,7 +22,7 @@ str(dataset)
 # Controllo dei valori mancanti
 colSums(is.na(dataset))
 
-# Statistiche descrittive
+# Statistiche descrittive di base
 summary(dataset)
 
 # Deviazione standard
@@ -40,57 +40,72 @@ stat_descrittive <- data.frame(
   Massimo = sapply(dataset, max)
 )
 
-stat_descrittive
-
 # Arrotondamento a due decimali
 stat_descrittive[, -1] <- round(stat_descrittive[, -1], 2)
 
-# Salvataggio della tabella
-write.csv2(stat_descrittive,
-           "Statistiche_Descrittive.csv",
-           row.names = FALSE)
+# Visualizzazione della tabella
+stat_descrittive
 
-# Creazione della cartella per i grafici
-if(!dir.exists("grafici")){
-  dir.create("grafici")
-}
+# Salvataggio della tabella delle statistiche descrittive
+write.csv2(
+  stat_descrittive,
+  "Statistiche_Descrittive.csv",
+  row.names = FALSE
+)
 
-# Boxplot delle variabili
-png("grafici/Boxplot_variabili.png",
-    width = 1800,
-    height = 1200)
+# Calcolo dell'Interquartile Range e dei limiti per gli outlier
+analisi_outlier <- data.frame(
+  Variabile = names(dataset),
+  PrimoQuartile = sapply(dataset, quantile, probs = 0.25),
+  TerzoQuartile = sapply(dataset, quantile, probs = 0.75)
+)
 
-par(mfrow = c(2,4))
+analisi_outlier$IQR <- analisi_outlier$TerzoQuartile - analisi_outlier$PrimoQuartile
 
-for(i in names(dataset)){
-  boxplot(dataset[[i]],
-          main = i,
-          col = "lightblue")
-}
+analisi_outlier$LimiteInferiore <- analisi_outlier$PrimoQuartile - 1.5 * analisi_outlier$IQR
+analisi_outlier$LimiteSuperiore <- analisi_outlier$TerzoQuartile + 1.5 * analisi_outlier$IQR
 
-dev.off()
+# Numero di outlier per ciascuna variabile
+analisi_outlier$NumeroOutlier <- sapply(names(dataset), function(i) {
+  Q1 <- quantile(dataset[[i]], 0.25)
+  Q3 <- quantile(dataset[[i]], 0.75)
+  IQR <- Q3 - Q1
+  LI <- Q1 - 1.5 * IQR
+  LS <- Q3 + 1.5 * IQR
+  
+  sum(dataset[[i]] < LI | dataset[[i]] > LS)
+})
 
-# Ricerca degli outlier
-outlier <- lapply(dataset, function(x) boxplot.stats(x)$out)
+# Arrotondamento a due decimali
+analisi_outlier[, 2:6] <- round(analisi_outlier[, 2:6], 2)
 
-outlier
+# Visualizzazione della tabella degli outlier
+analisi_outlier
 
-# Numero di outlier
-sapply(outlier, length)
+# Salvataggio della tabella degli outlier
+write.csv2(
+  analisi_outlier,
+  "Analisi_Outlier_IQR.csv",
+  row.names = FALSE
+)
 
-# Istogrammi
-png("grafici/Istogrammi_variabili.png",
-    width = 1800,
-    height = 1200)
+# Esempio dettagliato per la variabile dipendente y_IQ
+Q1_y <- quantile(dataset$y_IQ, 0.25)
+Q3_y <- quantile(dataset$y_IQ, 0.75)
 
-par(mfrow = c(2,4))
+IQR_y <- Q3_y - Q1_y
 
-for(i in names(dataset)){
-  hist(dataset[[i]],
-       main = i,
-       xlab = i,
-       col = "lightblue",
-       border = "white")
-}
+limite_inferiore_y <- Q1_y - 1.5 * IQR_y
+limite_superiore_y <- Q3_y + 1.5 * IQR_y
 
-dev.off()
+min_y <- min(dataset$y_IQ)
+max_y <- max(dataset$y_IQ)
+
+# Visualizzazione dei valori per y_IQ
+Q1_y
+Q3_y
+IQR_y
+limite_inferiore_y
+limite_superiore_y
+min_y
+max_y
