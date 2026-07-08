@@ -4,7 +4,7 @@
 rm(list = ls())
 
 # Impostazione cartella di lavoro
-setwd("/Users/danaiannaccone/Desktop/Gruppo19_SA")
+setwd("/Users/vince/Desktop/Progetto-Statistica-Appl-2025-26/Gruppo19")
 
 # Importazione dataset
 dataset <- read.csv("Dataset_N19.csv", header = TRUE)
@@ -89,56 +89,83 @@ for(i in names(dataset)){
 par(mfrow = c(1, 1))
 dev.off()
 
-# 3.2 Box Plot - un grafico per ogni variabile
+#Box plot
 
-for(i in names(dataset)){
+y <- dataset$y_IQ
+
+# Calcolo del criterio IQR per y_IQ
+Q1 <- quantile(y, 0.25)
+Q3 <- quantile(y, 0.75)
+IQR_y <- IQR(y)
+
+limite_inferiore <- Q1 - 1.5 * IQR_y
+limite_superiore <- Q3 + 1.5 * IQR_y
+
+outlier_y <- y[y < limite_inferiore | y > limite_superiore]
+
+print(data.frame(
+  Q1 = Q1,
+  Q3 = Q3,
+  IQR = IQR_y,
+  Limite_inferiore = limite_inferiore,
+  Limite_superiore = limite_superiore,
+  Osservazione_IQR = outlier_y
+))
+
+variabili <- c("x1_ISO", "x2_T", "x3_MP",
+               "x4_CF", "x5_F", "x6_GSI", "x7_UA")
+
+#Boxplot di y_IQ
+
+png("Grafici/BoxPlot/BoxPlot_y_IQ.png",
+    width = 1800,
+    height = 1400,
+    res = 300)
+
+par(mar = c(5,5,2,2))
+
+boxplot(y,
+        ylab = "y_IQ",
+        col = "lightblue",
+        border = "black",
+        outline = FALSE,
+        boxwex = 0.45,
+        lwd = 2,
+        cex.axis = 1.1,
+        cex.lab = 1.2)
+
+# Evidenzia manualmente l'outlier
+if(length(outlier_y) > 0){
   
-  png(
-    filename = paste0("Grafici/BoxPlot/Boxplot_", i, ".png"),
-    width = 900,
-    height = 900
-  )
+  points(1,
+         outlier_y,
+         pch = 16,
+         col = "red3",
+         cex = 0.8)
   
-  boxplot(
-    dataset[[i]],
-    main = paste("Box plot di", i),
-    ylab = i,
-    col = "lightblue"
-  )
-  
-  dev.off()
 }
 
-# Figura 3.2.2 - Box plot di tutte le variabili
+dev.off()
 
-png(
-  filename = "Grafici/BoxPlot/Figura_3_2_BoxPlot_tutte_variabili.png",
-  width = 2400,
-  height = 1600,
-  res = 200
-)
+# Box plot complessivo dei regressori
 
-par(
-  mfrow = c(2, 4),
-  mar = c(4, 4, 3, 1),
-  cex.main = 1,
-  cex.lab = 0.9,
-  cex.axis = 0.8
-)
+png("Grafici/BoxPlot/BoxPlot_Regressori.png",
+    width = 1400,
+    height = 900)
 
-for(i in names(dataset)){
-  
-  boxplot(
-    dataset[[i]],
-    main = paste("Box plot di", i),
-    ylab = "",
-    col = "lightblue",
-    border = "darkblue",
-    outline = TRUE
-  )
-}
+par(mar = c(8, 5, 2, 2))
 
-par(mfrow = c(1, 1))
+boxplot(dataset[, variabili],
+        ylab = "Valori standardizzati",
+        col = "lightblue",
+        border = "black",
+        las = 2,
+        outline = TRUE,
+        main = "",
+        boxwex = 0.65,
+        cex.axis = 1.1,
+        cex.lab = 1.2)
+
 dev.off()
 
 # 3.3 Scatter Plot
@@ -230,19 +257,39 @@ write.csv2(
   "Grafici/Correlazioni/Matrice_Correlazione.csv"
 )
 
-# 3.5 Heatmap delle correlazioni
+# Heatmap delle correlazioni
 
-png(
-  filename = "Grafici/Correlazioni/Heatmap_correlazioni.png",
-  width = 1200,
-  height = 1000
-)
+if (!require(corrplot)) {
+  install.packages("corrplot")
+  library(corrplot)
+} else {
+  library(corrplot)
+}
 
-heatmap(
-  matrice_correlazione,
-  main = "Heatmap delle correlazioni",
-  symm = TRUE
-)
+variabili_corr <- dataset[, c("y_IQ", "x1_ISO", "x2_T", "x3_MP",
+                              "x4_CF", "x5_F", "x6_GSI", "x7_UA")]
+
+matrice_corr <- cor(variabili_corr)
+
+print(round(matrice_corr, 3))
+
+png("Grafici/Correlazioni/Heatmap_Correlazioni.png",
+    width = 1600,
+    height = 1400,
+    res = 300)
+
+corrplot(matrice_corr,
+         method = "color",
+         type = "upper",
+         order = "original",
+         addCoef.col = "black",
+         number.cex = 0.65,
+         tl.col = "black",
+         tl.srt = 45,
+         tl.cex = 0.9,
+         col = colorRampPalette(c("blue", "white", "red"))(200),
+         cl.cex = 0.8,
+         diag = TRUE)
 
 dev.off()
 
