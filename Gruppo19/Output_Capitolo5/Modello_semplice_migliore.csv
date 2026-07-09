@@ -1,0 +1,2 @@
+"Variabile","Nome_R","Intercetta","Beta1","Errore_std_Beta1","t_value","p_value_Beta1","R2","R2_corretto","Errore_standard_residuo","F_statistic","p_value_F","Significativa_5percento"
+"Tempo di esposizione","x2_T",121.478736105466,-10.6059019928107,1.48630328710889,-7.13575895633047,1.68178644308652e-10,0.341924380200924,0.335209322856036,14.6388357348961,50.9190558828505,1.68178644308657e-10,"Sì"
