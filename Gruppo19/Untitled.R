@@ -1,0 +1,200 @@
+# 1. IMPORTAZIONE DEL DATASET
+
+dataset <- read.csv(
+  "Dataset_N19.csv",
+  header = TRUE,
+  sep = ",",
+  dec = "."
+)
+
+# Controllo rapido del dataset
+str(dataset)
+summary(dataset)
+
+# 2. DEFINIZIONE DEL MODELLO DI REGRESSIONE MULTIPLA
+
+# Modello completo con tutti i regressori
+modello_multiplo <- lm(
+  y_IQ ~ x1_ISO + x2_T + x3_MP + x4_CF +
+    x5_F + x6_GSI + x7_UA,
+  data = dataset
+)
+
+# 3. STIMA DEI PARAMETRI, TEST t E P-VALUE
+
+# Output completo del modello
+summary(modello_multiplo)
+
+# Salvataggio dell'output completo di R in formato .txt
+sink("Summary_Modello_Multiplo.txt")
+
+summary(modello_multiplo)
+
+sink()
+
+# 4. CREAZIONE ED ESPORTAZIONE DELLA TABELLA DEI COEFFICIENTI
+
+# Estrazione dei coefficienti dal modello
+coefficienti_grezzi <- as.data.frame(
+  summary(modello_multiplo)$coefficients
+)
+
+# Creazione di una tabella più leggibile per la relazione
+tabella_coefficienti <- data.frame(
+  Parametro = c(
+    "Intercetta",
+    "ISO",
+    "Tempo di esposizione",
+    "Megapixel",
+    "Crop Factor",
+    "Focale",
+    "Ground Sampling Interval",
+    "Altitudine UAV"
+  ),
+  
+  Stima = round(coefficienti_grezzi$Estimate, 4),
+  
+  Errore_standard = round(coefficienti_grezzi$`Std. Error`, 4),
+  
+  Statistica_t = round(coefficienti_grezzi$`t value`, 4),
+  
+  P_value = ifelse(
+    coefficienti_grezzi$`Pr(>|t|)` < 0.001,
+    "<0,001",
+    format(
+      round(coefficienti_grezzi$`Pr(>|t|)`, 3),
+      decimal.mark = ",",
+      nsmall = 3
+    )
+  ),
+  
+  Significativita = ifelse(
+    coefficienti_grezzi$`Pr(>|t|)` < 0.001,
+    "***",
+    ifelse(
+      coefficienti_grezzi$`Pr(>|t|)` < 0.01,
+      "**",
+      ifelse(
+        coefficienti_grezzi$`Pr(>|t|)` < 0.05,
+        "*",
+        ""
+      )
+    )
+  )
+)
+
+# Visualizzazione della tabella
+tabella_coefficienti
+
+# Esportazione in formato CSV compatibile con Excel italiano
+write.csv2(
+  tabella_coefficienti,
+  "Tabella_Coefficienti_Modello_Multiplo.csv",
+  row.names = FALSE
+)
+
+# 5. INTERVALLI DI CONFIDENZA DEI PARAMETRI
+
+# Calcolo degli intervalli di confidenza al 95%
+intervalli_confidenza <- as.data.frame(
+  confint(modello_multiplo, level = 0.95)
+)
+
+# Visualizzazione degli intervalli
+intervalli_confidenza
+
+# Esportazione in formato CSV
+write.csv2(
+  intervalli_confidenza,
+  "Intervalli_Confidenza_Modello_Multiplo.csv",
+  row.names = TRUE
+)
+# Tabella riassuntiva dei coefficienti
+
+tabella_finale <- cbind(
+  coefficienti,
+  intervalli_confidenza
+)
+
+write.csv2(
+  tabella_finale,
+  "Tabella_Coefficienti_Completa.csv",
+  row.names = TRUE
+)
+
+tabella_finale
+
+# 6. ANALISI DELLA VARIANZA
+
+# Tabella ANOVA del modello
+anova_modello <- as.data.frame(
+  anova(modello_multiplo)
+)
+
+# Visualizzazione della tabella ANOVA
+anova_modello
+
+# Esportazione in formato CSV
+write.csv2(
+  anova_modello,
+  "ANOVA_Modello_Multiplo.csv",
+  row.names = TRUE
+)
+
+# 7. TEST F GLOBALE DEL MODELLO
+
+# Estrazione della statistica F dall'output del modello
+f_statistica <- summary(modello_multiplo)$fstatistic
+
+# Valore della statistica F
+valore_F <- f_statistica[1]
+
+# Gradi di libertà al numeratore
+df1 <- f_statistica[2]
+
+# Gradi di libertà al denominatore
+df2 <- f_statistica[3]
+
+# Calcolo del p-value del test F globale
+p_value_F <- pf(
+  valore_F,
+  df1,
+  df2,
+  lower.tail = FALSE
+)
+
+# Visualizzazione dei risultati
+valore_F
+df1
+df2
+p_value_F
+
+# 8. ESPORTAZIONE DEL RISULTATO DEL TEST F
+
+test_F_globale <- data.frame(
+  Statistica_F = valore_F,
+  Gradi_liberta_numeratore = df1,
+  Gradi_liberta_denominatore = df2,
+  P_value = p_value_F
+)
+
+# Visualizzazione della tabella
+test_F_globale
+
+# Esportazione in formato CSV
+write.csv2(
+  test_F_globale,
+  "Test_F_Globale_Modello_Multiplo.csv",
+  row.names = FALSE
+)
+
+# 9. EQUAZIONE STIMATA DEL MODELLO
+
+# Visualizzazione dei coefficienti stimati
+coef(modello_multiplo)
+
+# Salvataggio dei coefficienti in un oggetto
+beta_stimati <- coef(modello_multiplo)
+
+beta_stimati
+
