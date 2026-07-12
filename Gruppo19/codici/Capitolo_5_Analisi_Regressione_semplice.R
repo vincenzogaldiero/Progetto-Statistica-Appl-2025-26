@@ -36,10 +36,17 @@ nomi_variabili <- c(
   x7_UA  = "Altitudine UAV"
 )
 
-# Creazione cartelle di output
+# Cartella principale
 dir.create("Output_Capitolo5", showWarnings = FALSE)
-dir.create("Output_Capitolo5/Grafici", showWarnings = FALSE)
+
+# Cartella Modelli
 dir.create("Output_Capitolo5/Modelli", showWarnings = FALSE)
+
+# Cartella Grafici (se non esiste)
+dir.create("Grafici", showWarnings = FALSE)
+
+# Sottocartella del Capitolo 5
+dir.create("Grafici/Capitolo5", showWarnings = FALSE)
 
 # STIMA DEI MODELLI DI REGRESSIONE LINEARE SEMPLICE
 
@@ -194,7 +201,7 @@ grafico_r2 <- ggplot(tabella_modelli_word,
 print(grafico_r2)
 
 ggsave(
-  filename = "Output_Capitolo5/Grafici/confronto_R2_modelli_semplici.png",
+  filename = "Grafici/Capitolo5/confronto_R2_modelli_semplici.png"
   plot = grafico_r2,
   width = 8,
   height = 5,
@@ -220,7 +227,7 @@ grafico_pvalue <- ggplot(tabella_modelli_word,
 print(grafico_pvalue)
 
 ggsave(
-  filename = "Output_Capitolo5/Grafici/confronto_pvalue_modelli_semplici.png",
+  filename = "Grafici/Capitolo5/confronto_pvalue_log_modelli_semplici.png",
   plot = grafico_pvalue,
   width = 8,
   height = 5,
@@ -235,7 +242,7 @@ for (x in x_vars) {
   modello <- modelli_semplici[[x]]
   
   png(
-    filename = paste0("Output_Capitolo5/Grafici/residui_", x, ".png"),
+    filename = paste0("Grafici/Capitolo5/residui_", x, ".png"),
     width = 900,
     height = 700
   )

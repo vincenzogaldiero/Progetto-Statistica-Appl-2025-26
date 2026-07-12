@@ -1,8 +1,0 @@
-"Variabile","Nome_R","Equazione_stimata"
-"ISO","x1_ISO","y_IQ = 118.7425 - 10.2785 * x1_ISO"
-"Tempo di esposizione","x2_T","y_IQ = 121.4787 - 10.6059 * x2_T"
-"Megapixel","x3_MP","y_IQ = 119.7018 + 2.9752 * x3_MP"
-"Crop Factor","x4_CF","y_IQ = 120.003 + 1.372 * x4_CF"
-"Focale","x5_F","y_IQ = 119.9582 - 4.3303 * x5_F"
-"Ground Sampling Interval","x6_GSI","y_IQ = 120.3586 - 3.3479 * x6_GSI"
-"Altitudine UAV","x7_UA","y_IQ = 120.2286 - 2.7846 * x7_UA"
