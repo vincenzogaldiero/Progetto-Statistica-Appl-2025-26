@@ -1,27 +1,13 @@
-# ============================================================
 # CAPITOLO 7 - VALUTAZIONE DEL MODELLO
-# ============================================================
 
-# ------------------------------------------------------------
 # 1. PULIZIA DELL'AMBIENTE
-# ------------------------------------------------------------
 
 rm(list = ls())
 
-
-# ------------------------------------------------------------
 # 2. IMPOSTAZIONE DELLA CARTELLA DI LAVORO
-# ------------------------------------------------------------
-
-# Modificare il percorso solo se la cartella del progetto
-# si trova in una posizione diversa.
-
 setwd("/Users/vince/Desktop/Progetto-Statistica-Appl-2025-26/Gruppo19")
 
-
-# ------------------------------------------------------------
 # 3. CONTROLLO E CARICAMENTO DEI PACCHETTI
-# ------------------------------------------------------------
 
 pacchetti <- c(
   "ggplot2",
@@ -47,10 +33,7 @@ invisible(
   )
 )
 
-
-# ------------------------------------------------------------
 # 4. CREAZIONE DELLA CARTELLA DEI GRAFICI
-# ------------------------------------------------------------
 
 cartella_grafici <- file.path(
   "grafici",
@@ -70,10 +53,7 @@ cat(
   "\n"
 )
 
-
-# ------------------------------------------------------------
 # 5. IMPORTAZIONE DEL DATASET
-# ------------------------------------------------------------
 
 dataset <- read.csv(
   "Dataset_N19.csv",
@@ -85,10 +65,7 @@ dataset <- read.csv(
 str(dataset)
 summary(dataset)
 
-
-# ------------------------------------------------------------
 # 6. DEFINIZIONE DELLE VARIABILI
-# ------------------------------------------------------------
 
 y_var <- "y_IQ"
 
@@ -112,10 +89,7 @@ nomi_variabili <- c(
   x7_UA  = "Altitudine UAV"
 )
 
-
-# ------------------------------------------------------------
 # 7. CONTROLLO DELLE COLONNE NECESSARIE
-# ------------------------------------------------------------
 
 variabili_richieste <- c(y_var, x_vars)
 
@@ -142,10 +116,7 @@ if (anyNA(dataset[, variabili_richieste])) {
   )
 }
 
-
-# ------------------------------------------------------------
 # 8. COSTRUZIONE DEL MODELLO MULTIPLO COMPLETO
-# ------------------------------------------------------------
 
 formula_multipla <- as.formula(
   paste(
@@ -164,10 +135,7 @@ summary_modello <- summary(modello_multiplo)
 
 print(summary_modello)
 
-
-# ============================================================
 # 7.1 COEFFICIENTE DI DETERMINAZIONE R²
-# ============================================================
 
 R2_multiplo <- summary_modello$r.squared
 
@@ -183,10 +151,7 @@ cat(
   "%\n"
 )
 
-
-# ------------------------------------------------------------
 # 9. MODELLI DI REGRESSIONE SEMPLICE
-# ------------------------------------------------------------
 
 lista_modelli_semplici <- lapply(
   x_vars,
@@ -205,10 +170,7 @@ lista_modelli_semplici <- lapply(
 
 names(lista_modelli_semplici) <- x_vars
 
-
-# ------------------------------------------------------------
 # 10. ESTRAZIONE R² DEI MODELLI SEMPLICI
-# ------------------------------------------------------------
 
 tabella_modelli_semplici <- data.frame(
   Variabile = x_vars,
@@ -232,10 +194,7 @@ tabella_modelli_semplici$Percentuale_spiegata <- (
   tabella_modelli_semplici$R2 * 100
 )
 
-
-# ------------------------------------------------------------
 # 11. AGGIUNTA DEL MODELLO MULTIPLO
-# ------------------------------------------------------------
 
 riga_modello_multiplo <- data.frame(
   Variabile = "Modello_completo",
@@ -264,10 +223,7 @@ tabella_confronto_R2 <- tabella_confronto_R2 %>%
 
 print(tabella_confronto_R2)
 
-
-# ------------------------------------------------------------
 # 12. ESPORTAZIONE DEL CONFRONTO R² IN EXCEL
-# ------------------------------------------------------------
 
 write.xlsx(
   tabella_confronto_R2,
@@ -276,10 +232,7 @@ write.xlsx(
   rowNames = FALSE
 )
 
-
-# ------------------------------------------------------------
 # 13. GRAFICO DI CONFRONTO DEI COEFFICIENTI R²
-# ------------------------------------------------------------
 
 dati_grafico_R2 <- tabella_confronto_R2 %>%
   mutate(
@@ -349,10 +302,7 @@ ggsave(
   dpi = 300
 )
 
-
-# ============================================================
 # 7.2 COEFFICIENTE DI DETERMINAZIONE CORRETTO
-# ============================================================
 
 R2_corretto_multiplo <- summary_modello$adj.r.squared
 
@@ -371,10 +321,7 @@ cat(
   "\n"
 )
 
-
-# ============================================================
 # 7.3 ERRORE QUADRATICO MEDIO
-# ============================================================
 
 # Valori osservati
 valori_osservati <- dataset[[y_var]]
@@ -391,10 +338,7 @@ n <- nrow(dataset)
 # Numero di regressori
 p <- length(x_vars)
 
-
-# ------------------------------------------------------------
 # 14. MSE CALCOLATO SULLE OSSERVAZIONI
-# ------------------------------------------------------------
 
 MSE_training <- mean(
   (valori_osservati - valori_stimati)^2
@@ -406,11 +350,7 @@ MAE_training <- mean(
   abs(valori_osservati - valori_stimati)
 )
 
-
-# ------------------------------------------------------------
 # 15. STIMA DELLA VARIANZA RESIDUA
-# ------------------------------------------------------------
-
 # Questa quantità utilizza n - p - 1 al denominatore
 # e coincide con il quadrato dell'errore standard residuo.
 
@@ -453,10 +393,7 @@ cat(
   "\n"
 )
 
-
-# ============================================================
 # 7.4 CAPACITÀ PREDITTIVA DEL MODELLO
-# ============================================================
 
 # La capacità predittiva viene valutata mediante
 # cross-validation a 10 blocchi.
@@ -464,10 +401,7 @@ cat(
 # Ogni osservazione viene prevista da un modello che non
 # utilizza quella stessa osservazione nella fase di stima.
 
-
-# ------------------------------------------------------------
 # 16. CROSS-VALIDATION A 10 BLOCCHI
-# ------------------------------------------------------------
 
 set.seed(19)
 
@@ -506,10 +440,7 @@ for (blocco in 1:numero_blocchi) {
   )
 }
 
-
-# ------------------------------------------------------------
 # 17. CONTROLLO DELLE PREDIZIONI
-# ------------------------------------------------------------
 
 if (anyNA(predizioni_cv)) {
   stop(
@@ -520,10 +451,7 @@ if (anyNA(predizioni_cv)) {
   )
 }
 
-
-# ------------------------------------------------------------
 # 18. INDICATORI PREDITTIVI CROSS-VALIDATI
-# ------------------------------------------------------------
 
 errori_cv <- valori_osservati - predizioni_cv
 
@@ -572,10 +500,7 @@ cat(
   "\n"
 )
 
-
-# ------------------------------------------------------------
 # 19. TABELLA COMPLESSIVA DEGLI INDICATORI
-# ------------------------------------------------------------
 
 tabella_indicatori <- data.frame(
   Indicatore = c(
@@ -620,10 +545,7 @@ tabella_indicatori$Valore <- round(
 
 print(tabella_indicatori)
 
-
-# ------------------------------------------------------------
 # 20. ESPORTAZIONE DEGLI INDICATORI IN EXCEL
-# ------------------------------------------------------------
 
 write.xlsx(
   tabella_indicatori,
@@ -632,10 +554,7 @@ write.xlsx(
   rowNames = FALSE
 )
 
-
-# ------------------------------------------------------------
 # 21. TABELLA VALORI OSSERVATI, STIMATI E PREDETTI
-# ------------------------------------------------------------
 
 tabella_predizioni <- data.frame(
   Osservazione = seq_len(n),
@@ -664,10 +583,7 @@ write.xlsx(
   rowNames = FALSE
 )
 
-
-# ------------------------------------------------------------
 # 22. GRAFICO VALORI OSSERVATI VS VALORI STIMATI
-# ------------------------------------------------------------
 
 dati_adattamento <- data.frame(
   Osservato = valori_osservati,
@@ -736,10 +652,7 @@ ggsave(
   dpi = 300
 )
 
-
-# ------------------------------------------------------------
 # 23. GRAFICO VALORI OSSERVATI VS PREDIZIONI CROSS-VALIDATE
-# ------------------------------------------------------------
 
 dati_previsione_cv <- data.frame(
   Osservato = valori_osservati,
@@ -810,10 +723,7 @@ ggsave(
   dpi = 300
 )
 
-
-# ------------------------------------------------------------
 # 24. TABELLA DI CONFRONTO TRA ADATTAMENTO E PREVISIONE
-# ------------------------------------------------------------
 
 tabella_confronto_errori <- data.frame(
   Valutazione = c(
@@ -855,10 +765,7 @@ write.xlsx(
   rowNames = FALSE
 )
 
-
-# ------------------------------------------------------------
 # 25. CREAZIONE DI UN UNICO FILE EXCEL CON TUTTI I RISULTATI
-# ------------------------------------------------------------
 
 workbook_capitolo7 <- createWorkbook()
 
@@ -951,15 +858,10 @@ saveWorkbook(
   overwrite = TRUE
 )
 
-
-# ------------------------------------------------------------
 # 26. RIEPILOGO FINALE
-# ------------------------------------------------------------
 
 cat("\n")
-cat("============================================================\n")
 cat("ANALISI DEL CAPITOLO 7 COMPLETATA\n")
-cat("============================================================\n")
 
 cat(
   "\nR²:",

@@ -201,7 +201,7 @@ grafico_r2 <- ggplot(tabella_modelli_word,
 print(grafico_r2)
 
 ggsave(
-  filename = "Grafici/Capitolo5/confronto_R2_modelli_semplici.png"
+  filename = "Grafici/Capitolo5/confronto_R2_modelli_semplici.png",
   plot = grafico_r2,
   width = 8,
   height = 5,

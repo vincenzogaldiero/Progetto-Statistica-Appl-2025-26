@@ -55,9 +55,7 @@ modello_completo <- lm(
   data = dataset
 )
 
-cat("\n============================================================\n")
 cat("MODELLO COMPLETO DI PARTENZA\n")
-cat("============================================================\n")
 
 print(formula(modello_completo))
 
@@ -77,9 +75,7 @@ modello_stepwise_AIC <- step(
   trace = 1
 )
 
-cat("\n============================================================\n")
 cat("MODELLO SELEZIONATO MEDIANTE AIC\n")
-cat("============================================================\n")
 
 print(formula(modello_stepwise_AIC))
 print(summary(modello_stepwise_AIC))
@@ -126,9 +122,7 @@ modello_stepwise_BIC <- step(
   trace = 1
 )
 
-cat("\n============================================================\n")
 cat("MODELLO SELEZIONATO MEDIANTE BIC\n")
-cat("============================================================\n")
 
 print(formula(modello_stepwise_BIC))
 print(summary(modello_stepwise_BIC))
@@ -232,9 +226,7 @@ tabella_confronto[colonne_numeriche] <- lapply(
   digits = 4
 )
 
-cat("\n============================================================\n")
 cat("CONFRONTO TRA I MODELLI\n")
-cat("============================================================\n")
 
 print(
   tabella_confronto,
@@ -265,9 +257,7 @@ stesso_modello <- identical(
   formula_BIC
 )
 
-cat("\n============================================================\n")
 cat("CONFRONTO TRA LE DUE PROCEDURE STEPWISE\n")
-cat("============================================================\n")
 
 if (stesso_modello) {
   
@@ -312,9 +302,7 @@ if (stesso_modello) {
   }
 }
 
-cat("\n============================================================\n")
 cat("MODELLO FINALE SELEZIONATO\n")
-cat("============================================================\n")
 
 cat("Criterio di scelta:", criterio_scelta, "\n\n")
 
@@ -378,9 +366,7 @@ coefficienti_finali$p_value <- signif(
   4
 )
 
-cat("\n============================================================\n")
 cat("COEFFICIENTI DEL MODELLO FINALE\n")
-cat("============================================================\n")
 
 print(
   coefficienti_finali,
@@ -400,7 +386,6 @@ sink(
 )
 
 cat("CAPITOLO 9 - MODELLO FINALE\n")
-cat("============================================\n\n")
 
 cat("Criterio di scelta:\n")
 cat(criterio_scelta, "\n\n")
