@@ -1,372 +1,428 @@
-# vettore dei dati
-x <- c(48.99, 52.07, 49.29, 51.66, 52.16, 49.72, 48.00, 49.96, 49.20, 48.10, 47.90, 46.94, 51.76, 50.75, 49.86, 51.57)
 # CAPITOLO 9 - SELEZIONE DEL MODELLO FINALE
+
 # Pulizia dell'ambiente
 rm(list = ls())
+
 setwd("/Users/danaiannaccone/Desktop/Progetto-Statistica-Appl-2025-26/Gruppo19")
+
 dataset <- read.csv(
-"Dataset_N19.csv",
-header = TRUE,
-sep = ","
+  "Dataset_N19.csv",
+  header = TRUE,
+  sep = ","
 )
+
 # Controllo delle variabili necessarie
 variabili_richieste <- c(
-"y_IQ",
-"x1_ISO",
-"x2_T",
-"x3_MP",
-"x4_CF",
-"x5_F",
-"x6_GSI",
-"x7_UA"
+  "y_IQ",
+  "x1_ISO",
+  "x2_T",
+  "x3_MP",
+  "x4_CF",
+  "x5_F",
+  "x6_GSI",
+  "x7_UA"
 )
+
 variabili_mancanti <- setdiff(variabili_richieste, names(dataset))
+
 if (length(variabili_mancanti) > 0) {
-stop(
-paste(
-"Nel dataset mancano le seguenti variabili:",
-paste(variabili_mancanti, collapse = ", ")
-)
-)
+  stop(
+    paste(
+      "Nel dataset mancano le seguenti variabili:",
+      paste(variabili_mancanti, collapse = ", ")
+    )
+  )
 }
+
 # Creazione della cartella contenente gli output del capitolo
 dir.create(
-"Output_Capitolo9",
-showWarnings = FALSE
+  "Output_Capitolo9",
+  showWarnings = FALSE
 )
+
 # 9.2 - DEFINIZIONE DEI MODELLI DI PARTENZA
+
 # Modello nullo: contiene soltanto l'intercetta
 modello_nullo <- lm(
-y_IQ ~ 1,
-data = dataset
+  y_IQ ~ 1,
+  data = dataset
 )
+
 # Modello completo già analizzato nei Capitoli 6, 7 e 8
 modello_completo <- lm(
-y_IQ ~ x1_ISO + x2_T + x3_MP + x4_CF +
-x5_F + x6_GSI + x7_UA,
-data = dataset
+  y_IQ ~ x1_ISO + x2_T + x3_MP + x4_CF +
+    x5_F + x6_GSI + x7_UA,
+  data = dataset
 )
+
 cat("\n============================================================\n")
 cat("MODELLO COMPLETO DI PARTENZA\n")
 cat("============================================================\n")
+
 print(formula(modello_completo))
+
 # 9.3 - REGRESSIONE STEPWISE BASATA SULL'AIC
+
 # La procedura bidirezionale può sia inserire sia rimuovere
 # regressori. Per l'AIC il valore della penalizzazione è k = 2.
+
 modello_stepwise_AIC <- step(
-object = modello_nullo,
-scope = list(
-lower = formula(modello_nullo),
-upper = formula(modello_completo)
-),
-direction = "both",
-k = 2,
-trace = 1
+  object = modello_nullo,
+  scope = list(
+    lower = formula(modello_nullo),
+    upper = formula(modello_completo)
+  ),
+  direction = "both",
+  k = 2,
+  trace = 1
 )
+
 cat("\n============================================================\n")
 cat("MODELLO SELEZIONATO MEDIANTE AIC\n")
 cat("============================================================\n")
+
 print(formula(modello_stepwise_AIC))
 print(summary(modello_stepwise_AIC))
+
 # Estrazione del percorso seguito dalla procedura AIC
 percorso_AIC <- as.data.frame(modello_stepwise_AIC$anova)
+
 # Rimozione dell'eventuale colonna non informativa
 percorso_AIC <- percorso_AIC[
-, !is.na(names(percorso_AIC)) & names(percorso_AIC) != ""
+  , !is.na(names(percorso_AIC)) & names(percorso_AIC) != ""
 ]
+
 # Aggiunta del numero del passaggio
 percorso_AIC$Passaggio <- seq_len(nrow(percorso_AIC))
+
 # Spostamento del numero del passaggio nella prima colonna
 percorso_AIC <- percorso_AIC[
-, c("Passaggio", setdiff(names(percorso_AIC), "Passaggio"))
+  , c("Passaggio", setdiff(names(percorso_AIC), "Passaggio"))
 ]
+
 # Salvataggio della tabella del percorso AIC
 write.csv2(
-percorso_AIC,
-file = "Output_Capitolo9/Percorso_Stepwise_AIC.csv",
-row.names = FALSE
+  percorso_AIC,
+  file = "Output_Capitolo9/Percorso_Stepwise_AIC.csv",
+  row.names = FALSE
 )
+
 # 9.4 - REGRESSIONE STEPWISE BASATA SUL BIC
+
 # Il BIC utilizza una penalizzazione pari a log(n),
 # dove n rappresenta il numero di osservazioni.
+
 n <- nrow(dataset)
 penalizzazione_BIC <- log(n)
+
 modello_stepwise_BIC <- step(
-object = modello_nullo,
-scope = list(
-lower = formula(modello_nullo),
-upper = formula(modello_completo)
-),
-direction = "both",
-k = penalizzazione_BIC,
-trace = 1
+  object = modello_nullo,
+  scope = list(
+    lower = formula(modello_nullo),
+    upper = formula(modello_completo)
+  ),
+  direction = "both",
+  k = penalizzazione_BIC,
+  trace = 1
 )
+
 cat("\n============================================================\n")
 cat("MODELLO SELEZIONATO MEDIANTE BIC\n")
 cat("============================================================\n")
+
 print(formula(modello_stepwise_BIC))
 print(summary(modello_stepwise_BIC))
+
 # Estrazione del percorso seguito dalla procedura BIC
 percorso_BIC <- as.data.frame(modello_stepwise_BIC$anova)
+
+# Rinomina della colonna AIC in BIC
+names(percorso_BIC)[names(percorso_BIC) == "AIC"] <- "BIC"
+
 # Rimozione dell'eventuale colonna non informativa
 percorso_BIC <- percorso_BIC[
-, !is.na(names(percorso_BIC)) & names(percorso_BIC) != ""
+  , !is.na(names(percorso_BIC)) & names(percorso_BIC) != ""
 ]
+
 # Aggiunta del numero del passaggio
 percorso_BIC$Passaggio <- seq_len(nrow(percorso_BIC))
+
 # Spostamento del numero del passaggio nella prima colonna
 percorso_BIC <- percorso_BIC[
-, c("Passaggio", setdiff(names(percorso_BIC), "Passaggio"))
+  , c("Passaggio", setdiff(names(percorso_BIC), "Passaggio"))
 ]
+
 # Salvataggio della tabella del percorso BIC
 write.csv2(
-percorso_BIC,
-file = "Output_Capitolo9/Percorso_Stepwise_BIC.csv",
-row.names = FALSE
+  percorso_BIC,
+  file = "Output_Capitolo9/Percorso_Stepwise_BIC.csv",
+  row.names = FALSE
 )
+
 # 9.5 - FUNZIONI PER IL CONFRONTO TRA I MODELLI
+
 # Restituisce i regressori presenti in un modello
 estrai_regressori <- function(modello) {
-regressori <- attr(
-terms(modello),
-"term.labels"
-)
-if (length(regressori) == 0) {
-return("Nessun regressore")
+  
+  regressori <- attr(
+    terms(modello),
+    "term.labels"
+  )
+  
+  if (length(regressori) == 0) {
+    return("Nessun regressore")
+  }
+  
+  paste(regressori, collapse = ", ")
 }
-paste(regressori, collapse = ", ")
-}
+
 # Calcola gli indicatori utilizzati nel confronto
 calcola_indicatori <- function(modello, nome_modello) {
-sommario <- summary(modello)
-residui_modello <- residuals(modello)
-# MSE calcolato come media dei quadrati dei residui,
-# coerentemente con il Capitolo 7
-mse <- mean(residui_modello^2)
-data.frame(
-Modello = nome_modello,
-Regressori = estrai_regressori(modello),
-Numero_regressori = length(attr(terms(modello), "term.labels")),
-R2 = sommario$r.squared,
-R2_corretto = sommario$adj.r.squared,
-MSE = mse,
-AIC = AIC(modello),
-BIC = BIC(modello),
-stringsAsFactors = FALSE
-)
+  
+  sommario <- summary(modello)
+  
+  residui_modello <- residuals(modello)
+  
+  # MSE calcolato come media dei quadrati dei residui,
+  # coerentemente con il Capitolo 7
+  mse <- mean(residui_modello^2)
+  
+  data.frame(
+    Modello = nome_modello,
+    Regressori = estrai_regressori(modello),
+    Numero_regressori = length(attr(terms(modello), "term.labels")),
+    R2 = sommario$r.squared,
+    R2_corretto = sommario$adj.r.squared,
+    MSE = mse,
+    AIC = AIC(modello),
+    BIC = BIC(modello),
+    stringsAsFactors = FALSE
+  )
 }
+
 # 9.6 - TABELLA COMPARATIVA DEI MODELLI
+
 tabella_confronto <- rbind(
-calcola_indicatori(
-modello_completo,
-"Modello completo"
-),
-calcola_indicatori(
-modello_stepwise_AIC,
-"Modello selezionato con AIC"
-),
-calcola_indicatori(
-modello_stepwise_BIC,
-"Modello selezionato con BIC"
+  calcola_indicatori(
+    modello_completo,
+    "Modello completo"
+  ),
+  calcola_indicatori(
+    modello_stepwise_AIC,
+    "Modello selezionato con AIC"
+  ),
+  calcola_indicatori(
+    modello_stepwise_BIC,
+    "Modello selezionato con BIC"
+  )
 )
-)
+
 # Arrotondamento dei risultati numerici
 colonne_numeriche <- c(
-"R2",
-"R2_corretto",
-"MSE",
-"AIC",
-"BIC"
+  "R2",
+  "R2_corretto",
+  "MSE",
+  "AIC",
+  "BIC"
 )
+
 tabella_confronto[colonne_numeriche] <- lapply(
-tabella_confronto[colonne_numeriche],
-round,
-digits = 4
+  tabella_confronto[colonne_numeriche],
+  round,
+  digits = 4
 )
+
 cat("\n============================================================\n")
 cat("CONFRONTO TRA I MODELLI\n")
 cat("============================================================\n")
+
 print(
-tabella_confronto,
-row.names = FALSE
+  tabella_confronto,
+  row.names = FALSE
 )
+
 # Salvataggio della tabella principale del Capitolo 9
 write.csv2(
-tabella_confronto,
-file = "Output_Capitolo9/Confronto_Modelli.csv",
-row.names = FALSE
+  tabella_confronto,
+  file = "Output_Capitolo9/Confronto_Modelli.csv",
+  row.names = FALSE
 )
+
 # 9.7 - VERIFICA DELLA COINCIDENZA TRA AIC E BIC
+
 formula_AIC <- paste(
-deparse(formula(modello_stepwise_AIC)),
-collapse = ""
+  deparse(formula(modello_stepwise_AIC)),
+  collapse = ""
 )
+
 formula_BIC <- paste(
-deparse(formula(modello_stepwise_BIC)),
-collapse = ""
+  deparse(formula(modello_stepwise_BIC)),
+  collapse = ""
 )
+
 stesso_modello <- identical(
-formula_AIC,
-formula_BIC
+  formula_AIC,
+  formula_BIC
 )
+
 cat("\n============================================================\n")
 cat("CONFRONTO TRA LE DUE PROCEDURE STEPWISE\n")
 cat("============================================================\n")
+
 if (stesso_modello) {
-cat(
-"Le procedure basate su AIC e BIC hanno selezionato",
-"lo stesso insieme di regressori.\n"
-)
+  
+  cat(
+    "Le procedure basate su AIC e BIC hanno selezionato",
+    "lo stesso insieme di regressori.\n"
+  )
+  
 } else {
-cat(
-"Le procedure basate su AIC e BIC hanno selezionato",
-"due modelli differenti.\n"
-)
+  
+  cat(
+    "Le procedure basate su AIC e BIC hanno selezionato",
+    "due modelli differenti.\n"
+  )
 }
+
 # 9.8 - SCELTA AUTOMATICA DEL MODELLO FINALE
+
 # Se AIC e BIC selezionano lo stesso modello, tale modello
 # viene assunto direttamente come modello finale.
 #
 # Se i risultati sono diversi, viene scelto il modello con
 # il BIC minore, poiché il BIC applica una penalizzazione
 # più severa alla complessità del modello.
+
 if (stesso_modello) {
-modello_finale <- modello_stepwise_AIC
-criterio_scelta <- "AIC e BIC concordi"
+  
+  modello_finale <- modello_stepwise_AIC
+  criterio_scelta <- "AIC e BIC concordi"
+  
 } else {
-if (BIC(modello_stepwise_AIC) <= BIC(modello_stepwise_BIC)) {
-modello_finale <- modello_stepwise_AIC
-criterio_scelta <- "BIC più basso nel confronto finale"
-} else {
-modello_finale <- modello_stepwise_BIC
-criterio_scelta <- "BIC più basso nel confronto finale"
+  
+  if (BIC(modello_stepwise_AIC) <= BIC(modello_stepwise_BIC)) {
+    
+    modello_finale <- modello_stepwise_AIC
+    criterio_scelta <- "BIC più basso nel confronto finale"
+    
+  } else {
+    
+    modello_finale <- modello_stepwise_BIC
+    criterio_scelta <- "BIC più basso nel confronto finale"
+  }
 }
-}
+
 cat("\n============================================================\n")
 cat("MODELLO FINALE SELEZIONATO\n")
 cat("============================================================\n")
+
 cat("Criterio di scelta:", criterio_scelta, "\n\n")
+
 cat("Formula del modello finale:\n")
 print(formula(modello_finale))
+
 cat("\nRiepilogo del modello finale:\n")
 print(summary(modello_finale))
+
 # 9.9 - TABELLA DEI COEFFICIENTI DEL MODELLO FINALE
+
 sommario_finale <- summary(modello_finale)
 coefficienti_finali <- as.data.frame(sommario_finale$coefficients)
+
 names(coefficienti_finali) <- c(
-"Stima",
-"Errore_standard",
-"t_value",
-"p_value"
+  "Stima",
+  "Errore_standard",
+  "t_value",
+  "p_value"
 )
+
 coefficienti_finali$Parametro <- rownames(coefficienti_finali)
 rownames(coefficienti_finali) <- NULL
+
 # Spostamento della colonna Parametro all'inizio
 coefficienti_finali <- coefficienti_finali[
-, c(
-"Parametro",
-"Stima",
-"Errore_standard",
-"t_value",
-"p_value"
-)
+  , c(
+    "Parametro",
+    "Stima",
+    "Errore_standard",
+    "t_value",
+    "p_value"
+  )
 ]
+
 # Indicazione della significatività al livello del 5%
 coefficienti_finali$Significativo_5_percento <- ifelse(
-coefficienti_finali$p_value < 0.05,
-"Sì",
-"No"
+  coefficienti_finali$p_value < 0.05,
+  "Sì",
+  "No"
 )
+
 # Arrotondamento, mantenendo i p-value molto piccoli leggibili
 coefficienti_finali$Stima <- round(
-coefficienti_finali$Stima,
-4
+  coefficienti_finali$Stima,
+  4
 )
+
 coefficienti_finali$Errore_standard <- round(
-coefficienti_finali$Errore_standard,
-4
+  coefficienti_finali$Errore_standard,
+  4
 )
+
 coefficienti_finali$t_value <- round(
-coefficienti_finali$t_value,
-4
+  coefficienti_finali$t_value,
+  4
 )
+
 coefficienti_finali$p_value <- signif(
-coefficienti_finali$p_value,
-4
+  coefficienti_finali$p_value,
+  4
 )
+
 cat("\n============================================================\n")
 cat("COEFFICIENTI DEL MODELLO FINALE\n")
 cat("============================================================\n")
+
 print(
-coefficienti_finali,
-row.names = FALSE
+  coefficienti_finali,
+  row.names = FALSE
 )
+
 write.csv2(
-coefficienti_finali,
-file = "Output_Capitolo9/Coefficienti_Modello_Finale.csv",
-row.names = FALSE
+  coefficienti_finali,
+  file = "Output_Capitolo9/Coefficienti_Modello_Finale.csv",
+  row.names = FALSE
 )
+
 # 9.10 - SALVATAGGIO DEL RIEPILOGO TESTUALE
+
 sink(
-"Output_Capitolo9/Riepilogo_Modello_Finale.txt"
+  "Output_Capitolo9/Riepilogo_Modello_Finale.txt"
 )
+
 cat("CAPITOLO 9 - MODELLO FINALE\n")
 cat("============================================\n\n")
+
 cat("Criterio di scelta:\n")
 cat(criterio_scelta, "\n\n")
+
 cat("Formula del modello finale:\n")
 print(formula(modello_finale))
+
 cat("\nRegressori inclusi:\n")
 cat(estrai_regressori(modello_finale), "\n\n")
+
 cat("Indicatori del modello finale:\n")
 print(
-calcola_indicatori(
-modello_finale,
-"Modello finale"
-),
-row.names = FALSE
+  calcola_indicatori(
+    modello_finale,
+    "Modello finale"
+  ),
+  row.names = FALSE
 )
+
 cat("\nRiepilogo statistico:\n")
 print(summary(modello_finale))
+
 sink()
+
 cat("ANALISI DEL CAPITOLO 9 COMPLETATA\n")
-# 9.4 - REGRESSIONE STEPWISE BASATA SUL BIC
-# Il BIC utilizza una penalizzazione pari a log(n),
-# dove n rappresenta il numero di osservazioni.
-n <- nrow(dataset)
-penalizzazione_BIC <- log(n)
-modello_stepwise_BIC <- step(
-object = modello_nullo,
-scope = list(
-lower = formula(modello_nullo),
-upper = formula(modello_completo)
-),
-direction = "both",
-k = penalizzazione_BIC,
-trace = 1
-)
-cat("\n============================================================\n")
-cat("MODELLO SELEZIONATO MEDIANTE BIC\n")
-cat("============================================================\n")
-print(formula(modello_stepwise_BIC))
-print(summary(modello_stepwise_BIC))
-# Estrazione del percorso seguito dalla procedura BIC
-percorso_BIC <- as.data.frame(modello_stepwise_BIC$anova)
-# Rinomina della colonna AIC in BIC
-names(percorso_BIC)[names(percorso_BIC) == "AIC"] <- "BIC"
-# Rimozione dell'eventuale colonna non informativa
-percorso_BIC <- percorso_BIC[
-, !is.na(names(percorso_BIC)) & names(percorso_BIC) != ""
-]
-# Aggiunta del numero del passaggio
-percorso_BIC$Passaggio <- seq_len(nrow(percorso_BIC))
-# Spostamento del numero del passaggio nella prima colonna
-percorso_BIC <- percorso_BIC[
-, c("Passaggio", setdiff(names(percorso_BIC), "Passaggio"))
-]
-# Salvataggio della tabella del percorso BIC
-write.csv2(
-percorso_BIC,
-file = "Output_Capitolo9/Percorso_Stepwise_BIC.csv",
-row.names = FALSE
-)
