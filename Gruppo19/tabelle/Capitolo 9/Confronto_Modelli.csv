@@ -1,4 +1,4 @@
 "Modello";"Regressori";"Numero_regressori";"R2";"R2_corretto";"MSE";"AIC";"BIC"
-"Modello completo";"x1_ISO, x2_T, x3_MP, x4_CF, x5_F, x6_GSI, x7_UA";7;0,7822;0,7656;69,5132;725,9394;749,3859
-"Modello selezionato con AIC";"x2_T, x1_ISO, x6_GSI, x5_F, x3_MP";5;0,7799;0,7682;70,2478;722,9906;741,2268
-"Modello selezionato con BIC";"x2_T, x1_ISO, x6_GSI, x5_F, x3_MP";5;0,7799;0,7682;70,2478;722,9906;741,2268
+"Modello completo";"x1_ISO, x2_T, x3_MP, x4_CF, x5_F, x6_GSI, x7_UA";7;0,7822;0,7656;69,5132;440,1517;460,993
+"Modello selezionato con AIC";"x2_T, x1_ISO, x6_GSI, x5_F, x3_MP";5;0,7799;0,7682;70,2478;437,2029;452,834
+"Modello selezionato con BIC";"x2_T, x1_ISO, x6_GSI, x5_F, x3_MP";5;0,7799;0,7682;70,2478;437,2029;452,834

@@ -188,8 +188,15 @@ calcola_indicatori <- function(modello, nome_modello) {
     R2 = sommario$r.squared,
     R2_corretto = sommario$adj.r.squared,
     MSE = mse,
-    AIC = AIC(modello),
-    BIC = BIC(modello),
+    AIC = extractAIC(
+      modello,
+      k = 2
+    )[2],
+    
+    BIC = extractAIC(
+      modello,
+      k = log(nrow(dataset))
+    )[2],
     stringsAsFactors = FALSE
   )
 }
@@ -290,7 +297,17 @@ if (stesso_modello) {
   
 } else {
   
-  if (BIC(modello_stepwise_AIC) <= BIC(modello_stepwise_BIC)) {
+  BIC_AIC <- extractAIC(
+    modello_stepwise_AIC,
+    k = log(nrow(dataset))
+  )[2]
+  
+  BIC_BIC <- extractAIC(
+    modello_stepwise_BIC,
+    k = log(nrow(dataset))
+  )[2]
+  
+  if (BIC_AIC <= BIC_BIC) {
     
     modello_finale <- modello_stepwise_AIC
     criterio_scelta <- "BIC più basso nel confronto finale"
@@ -299,6 +316,7 @@ if (stesso_modello) {
     
     modello_finale <- modello_stepwise_BIC
     criterio_scelta <- "BIC più basso nel confronto finale"
+    
   }
 }
 
